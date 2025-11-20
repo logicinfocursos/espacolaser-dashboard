@@ -1,0 +1,7 @@
+{
+  "name": "Projeto Olho Vivo",
+  "description": "Dashboard de Inteligência Competitiva para Espaço Laser com monitoramento de preços, agentes e conversas em tempo real.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
