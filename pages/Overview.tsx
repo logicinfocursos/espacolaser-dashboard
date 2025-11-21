@@ -1,19 +1,51 @@
 
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip as LeafletTooltip } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip as LeafletTooltip, useMap } from 'react-leaflet';
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, TrendingDown, Target, Map as MapIcon, Clock, MessageSquare, CheckCircle, AlertTriangle, Smartphone, Zap, Users, ShieldAlert, ExternalLink, RefreshCw, GitBranch, Crosshair, Star, ShieldCheck, User, Lock, DollarSign, X, Store, Info } from 'lucide-react';
+import { TrendingUp, TrendingDown, Target, Map as MapIcon, Clock, MessageSquare, CheckCircle, AlertTriangle, Smartphone, Zap, Users, ShieldAlert, ExternalLink, RefreshCw, GitBranch, Crosshair, Star, ShieldCheck, User, Lock, DollarSign, X, Store, Info, Unlock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, Button, Badge } from '../components/ui';
 import { MAP_DATA, MOCK_ALERTS, MOCK_AGENT_QUEUE, MOCK_PRICE_COMPARISON, MOCK_INTERACTION_TREND } from '../constants';
 import { generateDashboardInsights } from '../services/gemini';
-import { MapDataPoint } from '../types';
+import { MapDataPoint, Page } from '../types';
 
-const Overview: React.FC = () => {
+interface OverviewProps {
+  onNavigate: (page: Page) => void;
+}
+
+// Componente interno para controlar a interatividade do mapa via Hook
+const MapController = ({ interactive }: { interactive: boolean }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (interactive) {
+      map.dragging.enable();
+      map.scrollWheelZoom.enable();
+      map.doubleClickZoom.enable();
+      map.boxZoom.enable();
+      map.keyboard.enable();
+      if (map.tap) map.tap.enable();
+      map.getContainer().style.cursor = 'grab';
+    } else {
+      map.dragging.disable();
+      map.scrollWheelZoom.disable();
+      map.doubleClickZoom.disable();
+      map.boxZoom.disable();
+      map.keyboard.disable();
+      if (map.tap) map.tap.disable();
+      map.getContainer().style.cursor = 'default';
+    }
+  }, [interactive, map]);
+
+  return null;
+};
+
+const Overview: React.FC<OverviewProps> = ({ onNavigate }) => {
   const [insights, setInsights] = useState<string | null>(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [activeChartTab, setActiveChartTab] = useState<'price' | 'trend'>('price');
   const [selectedMapPoint, setSelectedMapPoint] = useState<MapDataPoint | null>(null);
+  const [isMapInteractive, setIsMapInteractive] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -308,10 +340,23 @@ const Overview: React.FC = () => {
         <Card className="h-full flex flex-col border-dark-border bg-dark-surface overflow-hidden">
           <div className="p-4 border-b border-dark-border flex justify-between items-center bg-slate-900/50">
              <h3 className="font-bold text-slate-200 text-sm flex items-center gap-2"><MapIcon className="w-4 h-4 text-brand"/> Cobertura Competitiva</h3>
-             <div className="flex gap-2 text-[10px]">
-               <span className="flex items-center gap-1 text-blue-400"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Espaço Laser</span>
-               <span className="flex items-center gap-1 text-red-400"><span className="w-2 h-2 rounded-full bg-red-500"></span> Concorrentes</span>
-               <span className="flex items-center gap-1 text-yellow-400"><span className="w-2 h-2 rounded-full bg-yellow-500"></span> Oportunidade</span>
+             <div className="flex items-center gap-4">
+               <div className="flex gap-2 text-[10px]">
+                 <span className="flex items-center gap-1 text-blue-400"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Espaço Laser</span>
+                 <span className="flex items-center gap-1 text-red-400"><span className="w-2 h-2 rounded-full bg-red-500"></span> Concorrentes</span>
+                 <span className="flex items-center gap-1 text-yellow-400"><span className="w-2 h-2 rounded-full bg-yellow-500"></span> Oportunidade</span>
+               </div>
+               
+               {/* Toggle Map Interactivity Button */}
+               <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  onClick={() => setIsMapInteractive(!isMapInteractive)}
+                  className={`text-xs gap-2 h-7 ${isMapInteractive ? 'text-brand bg-brand/10 hover:bg-brand/20' : 'text-slate-400 hover:text-slate-200'}`}
+               >
+                  {isMapInteractive ? <Unlock className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+                  {isMapInteractive ? 'Navegação Ativa' : 'Mapa Bloqueado'}
+               </Button>
              </div>
           </div>
           <div className="flex-1 bg-slate-900 relative z-0">
@@ -321,8 +366,13 @@ const Overview: React.FC = () => {
                 zoom={4} 
                 minZoom={4}
                 maxBounds={[[-36, -76], [8, -32]]}
-                style={{ height: '100%', width: '100%', background: '#0f172a' }}
+                dragging={isMapInteractive}
+                scrollWheelZoom={isMapInteractive}
+                doubleClickZoom={isMapInteractive}
+                touchZoom={isMapInteractive}
+                style={{ height: '100%', width: '100%', background: '#0f172a', cursor: isMapInteractive ? 'grab' : 'default' }}
               >
+                <MapController interactive={isMapInteractive} />
                 <TileLayer
                   attribution='&copy; OpenStreetMap'
                   url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -484,19 +534,25 @@ const Overview: React.FC = () => {
                  <h4 className="font-bold text-white mb-4 text-sm">Ações Rápidas</h4>
                  <div className="space-y-3">
                     
-                    {/* Nova Trilha */}
-                    <div className="flex items-center justify-between p-3 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-orange-500/50 transition-all cursor-pointer group">
+                    {/* Jobs (Antes: Nova Trilha) */}
+                    <div 
+                        className="flex items-center justify-between p-3 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-orange-500/50 transition-all cursor-pointer group"
+                        onClick={() => onNavigate(Page.PROSPECTION_JOBS)}
+                    >
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-orange-500/20 text-orange-500 rounded-lg group-hover:bg-orange-500 group-hover:text-white transition-colors shadow-sm shadow-orange-500/10">
                                 <GitBranch className="w-5 h-5" />
                             </div>
-                            <span className="font-semibold text-slate-200 text-sm">Nova Trilha</span>
+                            <span className="font-semibold text-slate-200 text-sm">Jobs</span>
                         </div>
                         <span className="text-xs text-slate-500 font-medium group-hover:text-orange-400 transition-colors">Abrir</span>
                     </div>
 
                     {/* Gerenciar Agentes */}
-                    <div className="flex items-center justify-between p-3 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-blue-500/50 transition-all cursor-pointer group">
+                    <div 
+                        className="flex items-center justify-between p-3 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-blue-500/50 transition-all cursor-pointer group"
+                        onClick={() => onNavigate(Page.AGENT_CONFIG)}
+                    >
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-blue-500/20 text-blue-500 rounded-lg group-hover:bg-blue-500 group-hover:text-white transition-colors shadow-sm shadow-blue-500/10">
                                 <Users className="w-5 h-5" />
@@ -507,7 +563,10 @@ const Overview: React.FC = () => {
                     </div>
 
                     {/* Ver Conversas */}
-                    <div className="flex items-center justify-between p-3 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-yellow-500/50 transition-all cursor-pointer group">
+                    <div 
+                        className="flex items-center justify-between p-3 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-yellow-500/50 transition-all cursor-pointer group"
+                        onClick={() => onNavigate(Page.LIVE_CONVERSATIONS)}
+                    >
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-yellow-500/20 text-yellow-500 rounded-lg group-hover:bg-yellow-500 group-hover:text-white transition-colors shadow-sm shadow-yellow-500/10">
                                 <MessageSquare className="w-5 h-5" />
@@ -517,13 +576,16 @@ const Overview: React.FC = () => {
                         <span className="text-xs text-slate-500 font-medium group-hover:text-yellow-400 transition-colors">Abrir</span>
                     </div>
 
-                    {/* Cockpit Leads */}
-                    <div className="flex items-center justify-between p-3 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-emerald-500/50 transition-all cursor-pointer group">
+                    {/* LLM's (Antes: Cockpit Leads) */}
+                    <div 
+                        className="flex items-center justify-between p-3 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-emerald-500/50 transition-all cursor-pointer group"
+                        onClick={() => onNavigate(Page.AI_SETTINGS)}
+                    >
                         <div className="flex items-center gap-3">
                             <div className="p-2.5 bg-emerald-500/20 text-emerald-500 rounded-lg group-hover:bg-emerald-500 group-hover:text-white transition-colors shadow-sm shadow-emerald-500/10">
                                 <Crosshair className="w-5 h-5" />
                             </div>
-                            <span className="font-semibold text-slate-200 text-sm">Cockpit Leads</span>
+                            <span className="font-semibold text-slate-200 text-sm">LLM's</span>
                         </div>
                         <span className="text-xs text-slate-500 font-medium group-hover:text-emerald-400 transition-colors">Abrir</span>
                     </div>
@@ -541,13 +603,13 @@ const Overview: React.FC = () => {
                  </div>
                  <div className="space-y-3">
                     
-                    {/* Activity 1 */}
+                    {/* Activity 1: Lead qualificado -> Prospects que responderão */}
                     <div className="flex items-center gap-4 p-3 rounded-xl border border-slate-800 bg-slate-900/30 hover:bg-slate-900 transition-all cursor-default hover:border-slate-700">
                         <div className="p-2 rounded-lg bg-green-900/20 text-green-400 border border-green-900/30">
                            <Star className="w-5 h-5" />
                         </div>
                         <div>
-                           <div className="text-sm font-semibold text-slate-200">Lead qualificado pela IA</div>
+                           <div className="text-sm font-semibold text-slate-200">Prospects que responderão ao agente de investigação no whatsapp</div>
                            <div className="text-xs text-slate-500">Agente Vendas • há 12 minutos</div>
                         </div>
                     </div>
@@ -574,13 +636,13 @@ const Overview: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Activity 4 */}
+                    {/* Activity 4: Trilha concluída -> Job concluído */}
                     <div className="flex items-center gap-4 p-3 rounded-xl border border-slate-800 bg-slate-900/30 hover:bg-slate-900 transition-all cursor-default hover:border-slate-700">
                         <div className="p-2 rounded-lg bg-teal-900/20 text-teal-400 border border-teal-900/30">
                            <GitBranch className="w-5 h-5" />
                         </div>
                         <div>
-                           <div className="text-sm font-semibold text-slate-200">Trilha concluída com sucesso</div>
+                           <div className="text-sm font-semibold text-slate-200">Job concluído com sucesso</div>
                            <div className="text-xs text-slate-500">Prospecção B2B • há 53 minutos</div>
                         </div>
                     </div>
@@ -596,13 +658,13 @@ const Overview: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Activity 6 */}
+                    {/* Activity 6: Lead convertido -> sucesso, informações obtidas... */}
                     <div className="flex items-center gap-4 p-3 rounded-xl border border-slate-800 bg-slate-900/30 hover:bg-slate-900 transition-all cursor-default hover:border-slate-700">
                         <div className="p-2 rounded-lg bg-emerald-900/20 text-emerald-400 border border-emerald-900/30">
                            <DollarSign className="w-5 h-5" />
                         </div>
                         <div>
-                           <div className="text-sm font-semibold text-slate-200">Lead convertido em venda</div>
+                           <div className="text-sm font-semibold text-slate-200">sucesso, informações obtidas do prospect Linda Center</div>
                            <div className="text-xs text-slate-500">Comercial • há 1h 20</div>
                         </div>
                     </div>

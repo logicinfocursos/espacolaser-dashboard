@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { 
     Database, Filter, Download, Tag, Clock, DollarSign, 
-    TrendingUp, TrendingDown, MapPin, List, Calendar, Store 
+    TrendingUp, TrendingDown, MapPin, List, Calendar, Store, Eye, X, AlertCircle, CheckCircle 
 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Badge } from '../components/ui';
 
 // --- MOCK DATA ---
@@ -50,8 +50,10 @@ const SERVICE_TAGS = [
 
 const CompetitiveData: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'prices' | 'services' | 'promos' | 'hours'>('prices');
+    const [selectedRecord, setSelectedRecord] = useState<any | null>(null);
     const [filters, setFilters] = useState({
         uf: [] as string[],
+        city: '',
         service: '',
         dateStart: '',
         dateEnd: '',
@@ -60,6 +62,17 @@ const CompetitiveData: React.FC = () => {
 
     const handleExport = () => {
         alert("Exportando dados para Excel (Mock)...");
+    };
+
+    // Helper to generate mock history data for charts
+    const generateMockHistory = (currentPrice: number) => {
+        return [
+            { month: 'Jan', price: currentPrice * 1.1 },
+            { month: 'Fev', price: currentPrice * 1.05 },
+            { month: 'Mar', price: currentPrice * 1.02 },
+            { month: 'Abr', price: currentPrice * 0.98 },
+            { month: 'Mai', price: currentPrice },
+        ];
     };
 
     return (
@@ -80,7 +93,7 @@ const CompetitiveData: React.FC = () => {
             {/* --- FILTERS --- */}
             <Card className="bg-dark-surface border-dark-border">
                 <CardContent className="pt-6">
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                    <div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
                         <div>
                             <label className="text-xs font-medium text-slate-400 mb-1 block">Região (UF)</label>
                             <select className="w-full h-10 bg-dark-bg border border-dark-border rounded-md px-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand/50">
@@ -89,6 +102,22 @@ const CompetitiveData: React.FC = () => {
                                 <option value="RJ">RJ</option>
                                 <option value="MG">MG</option>
                                 <option value="RS">RS</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-xs font-medium text-slate-400 mb-1 block">Município</label>
+                            <select 
+                                className="w-full h-10 bg-dark-bg border border-dark-border rounded-md px-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand/50"
+                                value={filters.city}
+                                onChange={(e) => setFilters({...filters, city: e.target.value})}
+                            >
+                                <option value="">Todos</option>
+                                <option value="São Paulo">São Paulo</option>
+                                <option value="Rio de Janeiro">Rio de Janeiro</option>
+                                <option value="Belo Horizonte">Belo Horizonte</option>
+                                <option value="Curitiba">Curitiba</option>
+                                <option value="Campinas">Campinas</option>
+                                <option value="Recife">Recife</option>
                             </select>
                         </div>
                         <div>
@@ -199,6 +228,7 @@ const CompetitiveData: React.FC = () => {
                                         <th className="px-6 py-4 font-medium">Preço Encontrado</th>
                                         <th className="px-6 py-4 font-medium">Diferença (vs EL)</th>
                                         <th className="px-6 py-4 font-medium">Data Coleta</th>
+                                        <th className="px-6 py-4 font-medium text-right">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-dark-border">
@@ -224,6 +254,16 @@ const CompetitiveData: React.FC = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-xs text-slate-500">{item.date}</td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        className="h-8 w-8 p-0 hover:bg-slate-700"
+                                                        onClick={() => setSelectedRecord({ type: 'price', ...item })}
+                                                    >
+                                                        <Eye className="w-4 h-4 text-brand" />
+                                                    </Button>
+                                                </td>
                                             </tr>
                                         );
                                     })}
@@ -309,7 +349,8 @@ const CompetitiveData: React.FC = () => {
                                     <th className="px-6 py-4 font-medium">Oferta / Promoção</th>
                                     <th className="px-6 py-4 font-medium">Vigência</th>
                                     <th className="px-6 py-4 font-medium">Canal Coleta</th>
-                                    <th className="px-6 py-4 font-medium text-right">Status</th>
+                                    <th className="px-6 py-4 font-medium">Status</th>
+                                    <th className="px-6 py-4 font-medium text-right">Ações</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-dark-border">
@@ -323,10 +364,20 @@ const CompetitiveData: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4 text-xs text-slate-300">{item.validity}</td>
                                         <td className="px-6 py-4 text-xs text-slate-500">{item.channel}</td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-6 py-4">
                                             <Badge variant={item.active ? 'success' : 'outline'} className="text-[10px]">
                                                 {item.active ? 'VIGENTE' : 'ENCERRADA'}
                                             </Badge>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                className="h-8 w-8 p-0 hover:bg-slate-700"
+                                                onClick={() => setSelectedRecord({ type: 'promo', ...item })}
+                                            >
+                                                <Eye className="w-4 h-4 text-brand" />
+                                            </Button>
                                         </td>
                                     </tr>
                                 ))}
@@ -369,6 +420,91 @@ const CompetitiveData: React.FC = () => {
                         </table>
                     </div>
                 </Card>
+            )}
+
+            {/* --- DETAILS MODAL --- */}
+            {selectedRecord && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 rounded-lg" onClick={() => setSelectedRecord(null)}>
+                    <Card className="w-full max-w-2xl bg-dark-surface border-dark-border shadow-2xl animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+                        <CardHeader className="border-b border-dark-border pb-4 flex flex-row justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-slate-800 rounded-lg border border-slate-700">
+                                    {selectedRecord.type === 'price' ? <DollarSign className="w-6 h-6 text-brand" /> : <Tag className="w-6 h-6 text-yellow-400" />}
+                                </div>
+                                <div>
+                                    <CardTitle>
+                                        {selectedRecord.type === 'price' ? selectedRecord.service : 'Detalhes da Promoção'}
+                                    </CardTitle>
+                                    <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                                        <Store className="w-3 h-3" /> {selectedRecord.competitor} ({selectedRecord.city || selectedRecord.location})
+                                    </p>
+                                </div>
+                            </div>
+                            <Button variant="ghost" size="sm" onClick={() => setSelectedRecord(null)}><X className="w-5 h-5" /></Button>
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-6">
+                            
+                            {selectedRecord.type === 'price' && (
+                                <>
+                                    {/* Price Stats */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                                            <span className="text-xs text-slate-500 uppercase font-bold block mb-1">Preço Concorrente</span>
+                                            <span className="text-2xl font-bold text-white">R$ {selectedRecord.price.toFixed(2)}</span>
+                                        </div>
+                                        <div className="bg-brand/10 p-4 rounded-xl border border-brand/30">
+                                            <span className="text-xs text-brand uppercase font-bold block mb-1">Nosso Preço</span>
+                                            <span className="text-2xl font-bold text-white">R$ {selectedRecord.elPrice.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Historical Chart */}
+                                    <div className="h-64 bg-slate-900/50 rounded-xl border border-slate-800 p-4">
+                                        <h4 className="text-xs font-bold text-slate-400 mb-4 uppercase">Histórico de Variação (Simulado)</h4>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <LineChart data={generateMockHistory(selectedRecord.price)}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                                                <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                                                <YAxis domain={['auto', 'auto']} stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} unit=" R$" />
+                                                <Tooltip 
+                                                    contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#fff' }}
+                                                    formatter={(value: number) => [`R$ ${value.toFixed(2)}`, 'Preço']}
+                                                />
+                                                <Line type="monotone" dataKey="price" stroke="#ef4444" strokeWidth={3} dot={{r: 4, fill:'#ef4444'}} activeDot={{r: 6}} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </>
+                            )}
+
+                            {selectedRecord.type === 'promo' && (
+                                <>
+                                    <div className="p-4 bg-yellow-900/10 border border-yellow-900/30 rounded-lg">
+                                        <h4 className="text-sm font-bold text-yellow-400 mb-2 uppercase flex items-center gap-2">
+                                            <AlertCircle className="w-4 h-4" /> Oferta Identificada
+                                        </h4>
+                                        <p className="text-lg text-white font-medium">"{selectedRecord.promo}"</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-slate-900 p-3 rounded border border-slate-800">
+                                            <span className="text-xs text-slate-500 block">Canal de Coleta</span>
+                                            <span className="text-sm text-white font-mono">{selectedRecord.channel}</span>
+                                        </div>
+                                        <div className="bg-slate-900 p-3 rounded border border-slate-800">
+                                            <span className="text-xs text-slate-500 block">Validade Estimada</span>
+                                            <span className="text-sm text-white">{selectedRecord.validity}</span>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Footer */}
+                            <div className="flex justify-end gap-2 pt-2 border-t border-dark-border">
+                                <Button variant="outline" onClick={() => setSelectedRecord(null)}>Fechar</Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             )}
         </div>
     );

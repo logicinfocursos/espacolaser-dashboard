@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
+import Header from './components/Header';
 import Overview from './pages/Overview';
 import Pricing from './pages/Pricing';
 import BotFarm from './pages/BotFarm';
@@ -24,6 +25,7 @@ import GlobalChat from './components/GlobalChat';
 import HumanChatConsole from './pages/HumanChatConsole';
 import LiveConversations from './pages/LiveConversations';
 import PromptTemplates from './pages/PromptTemplates';
+import UsersPage from './pages/Users';
 import { Page } from './types';
 
 const App: React.FC = () => {
@@ -33,7 +35,7 @@ const App: React.FC = () => {
   const renderPage = () => {
     switch (activePage) {
       case Page.OVERVIEW:
-        return <Overview />;
+        return <Overview onNavigate={setActivePage} />;
       case Page.PRICING:
         return <Pricing />;
       case Page.COMPETITIVE_DATA:
@@ -76,8 +78,10 @@ const App: React.FC = () => {
         return <PromptTemplates />;
       case Page.HISTORY:
         return <ConversationHistory />;
+      case Page.USERS:
+        return <UsersPage />;
       default:
-        return <Overview />;
+        return <Overview onNavigate={setActivePage} />;
     }
   };
 
@@ -87,10 +91,14 @@ const App: React.FC = () => {
         activePage={activePage} 
         onNavigate={setActivePage} 
         isCollapsed={isSidebarCollapsed}
-        toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
+      <Header 
+        isSidebarCollapsed={isSidebarCollapsed} 
+        toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+      />
+      
       <main 
-        className={`flex-1 p-8 h-screen overflow-y-auto custom-scrollbar transition-all duration-300 ease-in-out ${
+        className={`flex-1 p-8 pt-24 h-screen overflow-y-auto custom-scrollbar transition-all duration-300 ease-in-out ${
           isSidebarCollapsed ? 'ml-20' : 'ml-64'
         }`}
       >

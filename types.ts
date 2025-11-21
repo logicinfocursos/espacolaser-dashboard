@@ -277,8 +277,9 @@ export enum Page {
   JOB_MONITORING = 'job_monitoring',
   SIM_MANAGEMENT = 'sim_management',
   MESSAGE_TEMPLATES = 'message_templates',
-  PROMPTS = 'prompts', // New Page
+  PROMPTS = 'prompts',
   HISTORY = 'history',
   COMPETITIVE_DATA = 'competitive_data',
-  HUMAN_CHAT_CONSOLE = 'human_chat_console'
+  HUMAN_CHAT_CONSOLE = 'human_chat_console',
+  USERS = 'users'
 }
