@@ -1,17 +1,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip as LeafletTooltip } from 'react-leaflet';
-import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts';
-import { TrendingUp, TrendingDown, Target, Map as MapIcon, Clock, MessageSquare, CheckCircle, AlertTriangle, Smartphone, Zap, Users, ShieldAlert, ExternalLink, RefreshCw, GitBranch, Crosshair, Star, ShieldCheck, User, Lock, DollarSign } from 'lucide-react';
+import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend, PieChart, Pie, Cell } from 'recharts';
+import { TrendingUp, TrendingDown, Target, Map as MapIcon, Clock, MessageSquare, CheckCircle, AlertTriangle, Smartphone, Zap, Users, ShieldAlert, ExternalLink, RefreshCw, GitBranch, Crosshair, Star, ShieldCheck, User, Lock, DollarSign, X, Store, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, Button, Badge } from '../components/ui';
 import { MAP_DATA, MOCK_ALERTS, MOCK_AGENT_QUEUE, MOCK_PRICE_COMPARISON, MOCK_INTERACTION_TREND } from '../constants';
 import { generateDashboardInsights } from '../services/gemini';
+import { MapDataPoint } from '../types';
 
 const Overview: React.FC = () => {
   const [insights, setInsights] = useState<string | null>(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [activeChartTab, setActiveChartTab] = useState<'price' | 'trend'>('price');
+  const [selectedMapPoint, setSelectedMapPoint] = useState<MapDataPoint | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -47,9 +49,222 @@ const Overview: React.FC = () => {
     </div>
   );
 
+  // --- Modal Content Generators ---
+  const renderMapPointDetails = () => {
+    if (!selectedMapPoint) return null;
+
+    // Mock Data Generators based on Type
+    const mockRevenueData = [
+      { month: 'Jan', val: 4000 }, { month: 'Fev', val: 3000 }, { month: 'Mar', val: 5000 },
+      { month: 'Abr', val: 4500 }, { month: 'Mai', val: 6000 }, { month: 'Jun', val: 5500 },
+    ];
+
+    const mockCompetitorPriceData = [
+        { name: 'Virilha', us: 100, them: 85 },
+        { name: 'Axila', us: 60, them: 45 },
+        { name: 'Perna', us: 200, them: 190 },
+    ];
+
+    const mockOpportunityData = [
+        { name: 'Atendido', value: 30 },
+        { name: 'Gap', value: 70 },
+    ];
+
+    return (
+        <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setSelectedMapPoint(null)}>
+            <Card className="w-full max-w-3xl bg-dark-surface border-dark-border shadow-2xl animate-in zoom-in-95 duration-200 relative" onClick={(e) => e.stopPropagation()}>
+                <div className="absolute top-4 right-4">
+                    <Button variant="ghost" size="sm" onClick={() => setSelectedMapPoint(null)}><X className="w-5 h-5" /></Button>
+                </div>
+                
+                <CardHeader className="border-b border-dark-border pb-4">
+                    <div className="flex items-center gap-3">
+                        <div className={`p-3 rounded-full ${
+                            selectedMapPoint.type === 'own_unit' ? 'bg-blue-500/20 text-blue-400' :
+                            selectedMapPoint.type === 'competitor' ? 'bg-red-500/20 text-red-400' :
+                            'bg-yellow-500/20 text-yellow-400'
+                        }`}>
+                            {selectedMapPoint.type === 'own_unit' ? <Store className="w-6 h-6" /> :
+                             selectedMapPoint.type === 'competitor' ? <ShieldAlert className="w-6 h-6" /> :
+                             <Target className="w-6 h-6" />}
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <CardTitle>{selectedMapPoint.name}</CardTitle>
+                                <Badge variant="outline" className="text-[10px] uppercase">
+                                    {selectedMapPoint.city}
+                                </Badge>
+                            </div>
+                            <p className="text-sm text-slate-400">{selectedMapPoint.details}</p>
+                        </div>
+                    </div>
+                </CardHeader>
+
+                <CardContent className="pt-6">
+                    {/* --- TYPE: OWN UNIT --- */}
+                    {selectedMapPoint.type === 'own_unit' && (
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="bg-slate-900 p-4 rounded-lg border border-slate-800">
+                                    <div className="text-xs text-slate-500">Faturamento (Mês)</div>
+                                    <div className="text-xl font-bold text-white">R$ 145.200</div>
+                                    <div className="text-xs text-green-400 mt-1 flex items-center gap-1"><TrendingUp className="w-3 h-3"/> +12% meta</div>
+                                </div>
+                                <div className="bg-slate-900 p-4 rounded-lg border border-slate-800">
+                                    <div className="text-xs text-slate-500">NPS</div>
+                                    <div className="text-xl font-bold text-white">78</div>
+                                    <div className="text-xs text-slate-400 mt-1">Zona de Excelência</div>
+                                </div>
+                                <div className="bg-slate-900 p-4 rounded-lg border border-slate-800">
+                                    <div className="text-xs text-slate-500">Conversão</div>
+                                    <div className="text-xl font-bold text-white">32%</div>
+                                    <div className="text-xs text-yellow-400 mt-1">Abaixo da regional</div>
+                                </div>
+                            </div>
+                            
+                            <div className="h-64 w-full bg-slate-900/50 rounded-xl p-4 border border-slate-800">
+                                <h4 className="text-xs font-bold text-slate-400 mb-4 uppercase">Tendência de Vendas (6 Meses)</h4>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={mockRevenueData}>
+                                        <defs>
+                                            <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                        <XAxis dataKey="month" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                                        <Tooltip contentStyle={{backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc'}} />
+                                        <Area type="monotone" dataKey="val" stroke="#3b82f6" fillOpacity={1} fill="url(#colorVal)" />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+
+                            <div className="bg-blue-900/10 border border-blue-900/30 p-3 rounded-lg flex gap-3 items-start">
+                                <Info className="w-5 h-5 text-blue-400 mt-0.5" />
+                                <div className="text-sm text-blue-200">
+                                    <strong>Insight Operacional:</strong> Unidade com alta performance em virilha, mas baixa conversão em pacotes masculinos. Sugerimos treinamento da equipe local focado no público masculino.
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- TYPE: COMPETITOR --- */}
+                    {selectedMapPoint.type === 'competitor' && (
+                        <div className="space-y-6">
+                            <div className="flex gap-4">
+                                <div className="flex-1 bg-red-900/10 p-4 rounded-lg border border-red-900/30">
+                                    <div className="text-xs text-red-400 font-bold uppercase mb-1">Nível de Ameaça</div>
+                                    <div className="text-2xl font-bold text-white">ALTO</div>
+                                    <div className="text-xs text-slate-400 mt-2">Campanha agressiva detectada há 2 dias.</div>
+                                </div>
+                                <div className="flex-1 bg-slate-900 p-4 rounded-lg border border-slate-800">
+                                    <div className="text-xs text-slate-500 font-bold uppercase mb-1">Promoção Ativa</div>
+                                    <div className="text-sm text-white font-medium">"50% OFF na primeira sessão"</div>
+                                    <div className="text-xs text-brand mt-2 cursor-pointer hover:underline">Ver print do Instagram</div>
+                                </div>
+                            </div>
+
+                            <div className="h-64 w-full bg-slate-900/50 rounded-xl p-4 border border-slate-800">
+                                <h4 className="text-xs font-bold text-slate-400 mb-4 uppercase">Comparativo de Preços (R$)</h4>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={mockCompetitorPriceData} layout="vertical">
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={false} />
+                                        <XAxis type="number" stroke="#64748b" fontSize={12} hide />
+                                        <YAxis dataKey="name" type="category" stroke="#94a3b8" fontSize={12} width={60} />
+                                        <Tooltip cursor={{fill: 'transparent'}} contentStyle={{backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc'}} />
+                                        <Legend />
+                                        <Bar dataKey="us" name="Espaço Laser" fill="#00d1b2" barSize={20} radius={[0, 4, 4, 0]} />
+                                        <Bar dataKey="them" name="Concorrente" fill="#ef4444" barSize={20} radius={[0, 4, 4, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+
+                            <div className="bg-slate-900 p-3 rounded-lg border border-slate-800">
+                                <h4 className="text-xs font-bold text-slate-400 mb-2 uppercase">Histórico de Monitoramento</h4>
+                                <ul className="space-y-2">
+                                    <li className="text-xs text-slate-300 flex justify-between">
+                                        <span>Alteração de preço detectada</span>
+                                        <span className="text-slate-500">Ontem, 14:30</span>
+                                    </li>
+                                    <li className="text-xs text-slate-300 flex justify-between">
+                                        <span>Novo post promocional (Instagram)</span>
+                                        <span className="text-slate-500">10/03, 09:00</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- TYPE: OPPORTUNITY --- */}
+                    {selectedMapPoint.type === 'opportunity_zone' && (
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-yellow-900/10 p-4 rounded-lg border border-yellow-900/30">
+                                    <div className="text-xs text-yellow-500 font-bold uppercase mb-1">Potencial de Receita</div>
+                                    <div className="text-2xl font-bold text-white">R$ 250k<span className="text-sm font-normal text-slate-400">/mês</span></div>
+                                </div>
+                                <div className="bg-slate-900 p-4 rounded-lg border border-slate-800">
+                                    <div className="text-xs text-slate-500 font-bold uppercase mb-1">Público Alvo (Classe A/B)</div>
+                                    <div className="text-2xl font-bold text-white">45.000</div>
+                                    <div className="text-xs text-slate-400">Habitantes na área primária</div>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-6 h-64">
+                                <div className="flex-1 bg-slate-900/50 rounded-xl p-4 border border-slate-800 relative">
+                                    <h4 className="text-xs font-bold text-slate-400 mb-4 uppercase text-center">Market Share Estimado</h4>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={mockOpportunityData}
+                                                innerRadius={60}
+                                                outerRadius={80}
+                                                paddingAngle={5}
+                                                dataKey="value"
+                                            >
+                                                <Cell fill="#334155" /> {/* Atendido */}
+                                                <Cell fill="#eab308" /> {/* Gap */}
+                                            </Pie>
+                                            <Tooltip contentStyle={{backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc'}} />
+                                            <Legend verticalAlign="bottom" height={36}/>
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center mt-2">
+                                        <div className="text-2xl font-bold text-yellow-500">70%</div>
+                                        <div className="text-[10px] text-slate-400">GAP</div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex-1 flex flex-col justify-center space-y-4">
+                                    <div className="bg-slate-900 p-3 rounded border border-slate-800">
+                                        <div className="text-xs text-slate-500">Concorrência Local</div>
+                                        <div className="text-sm text-white">Baixa (Apenas 2 clínicas pequenas)</div>
+                                    </div>
+                                    <div className="bg-slate-900 p-3 rounded border border-slate-800">
+                                        <div className="text-xs text-slate-500">Shopping Centers</div>
+                                        <div className="text-sm text-white">1 Shopping de Grande Porte s/ EL</div>
+                                    </div>
+                                    <Button className="w-full bg-yellow-600 hover:bg-yellow-700 text-white">
+                                        Gerar Plano de Expansão
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                </CardContent>
+            </Card>
+        </div>
+    );
+  };
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 pb-10">
+    <div className="space-y-6 animate-in fade-in duration-500 pb-10 relative">
       
+      {/* Render Modal if selected */}
+      {renderMapPointDetails()}
+
       {/* Header & Title */}
       <div className="flex justify-between items-end">
         <div>
@@ -123,11 +338,17 @@ const Overview: React.FC = () => {
                       center={[point.lat, point.lng]}
                       pathOptions={{ color: color, fillColor: color, fillOpacity: 0.7, weight: 1 }}
                       radius={point.type === 'opportunity_zone' ? 12 : 6}
+                      eventHandlers={{
+                        click: () => {
+                            setSelectedMapPoint(point);
+                        }
+                      }}
                     >
                       <LeafletTooltip direction="top" offset={[0, -10]} opacity={1}>
                         <div className="text-center">
                           <div className="font-bold text-slate-900">{point.name}</div>
                           <div className="text-xs text-slate-600">{point.details}</div>
+                          <div className="text-[9px] text-slate-500 mt-1 font-medium uppercase">Clique para detalhes</div>
                         </div>
                       </LeafletTooltip>
                     </CircleMarker>

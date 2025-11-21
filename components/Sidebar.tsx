@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { LayoutDashboard, Tag, Radio, Map, ServerCog, FileText, LogOut, Settings, CircleDollarSign, Gavel, UserCog, UserPlus, Briefcase, Activity, Smartphone, Copy, History, Database, Bot, MessageCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { LayoutDashboard, Tag, Radio, Map, ServerCog, FileText, LogOut, Settings, CircleDollarSign, Gavel, UserCog, UserPlus, Briefcase, Activity, Smartphone, Copy, History, Database, Bot, MessageCircle, ChevronDown, ChevronRight, Globe, Sparkles } from 'lucide-react';
 import { Page } from '../types';
 import { cn } from './ui';
 import { CURRENT_USER } from '../constants';
@@ -11,6 +11,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
+  const [isOthersOpen, setIsOthersOpen] = useState(false);
   
   const navGroups = [
     {
@@ -19,31 +20,41 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
         { id: Page.OVERVIEW, label: 'Dashboard', icon: LayoutDashboard },
         { id: Page.JOB_MONITORING, label: 'Monitoramento', icon: Activity },
         { id: Page.LIVE_CONVERSATIONS, label: 'Conversas ao vivo', icon: MessageCircle },
-        { id: Page.LIVE_INVESTIGATION, label: 'Investigações ao vivo', icon: Radio },
-        { id: Page.HUMAN_CHAT_CONSOLE, label: 'Console de Intervenção', icon: UserCog },
-        { id: Page.HUMAN_INTERVENTION, label: 'Monitoramento humano', icon: UserCog },
       ]
     },
     {
       title: "Info",
       items: [
         { id: Page.COMPETITIVE_DATA, label: 'Dados competitivos', icon: Database },
-        { id: Page.STRATEGY, label: 'Estratégia & Gaps', icon: Map },
         { id: Page.PRICING, label: 'Inteligência de preços', icon: Tag },
-        { id: Page.HISTORY, label: 'Histórico Conversas', icon: History },
       ]
     },
     {
       title: "Configuração",
       items: [
-        { id: Page.BOT_FARM, label: 'Gestão de coleta', icon: ServerCog },
         { id: Page.SIM_MANAGEMENT, label: 'Cartões SIMs', icon: Smartphone },
         { id: Page.PROSPECTION_JOBS, label: 'Jobs', icon: Briefcase },
         { id: Page.PROSPECTS, label: 'Prospects', icon: UserPlus },
-        { id: Page.MESSAGE_TEMPLATES, label: 'Templates de mensagem', icon: Copy },
-        { id: Page.AGENT_CONFIG, label: 'Agentes', icon: Bot },
-        { id: Page.LLM_JUDGE, label: 'LLM Judge (Supervisor)', icon: Gavel },
         { id: Page.AI_SETTINGS, label: 'LLMs', icon: Settings },
+        // Subgrupo Templates
+        {
+          title: "Templates",
+          isSubgroup: true,
+          items: [
+            { id: Page.MESSAGE_TEMPLATES, label: 'Mensagens', icon: Copy },
+            { id: Page.PROMPTS, label: 'Prompts de Sistema', icon: Sparkles },
+          ]
+        },
+        // Subgrupo Agentes
+        {
+          title: "Agentes",
+          isSubgroup: true,
+          items: [
+            { id: Page.AGENT_CONFIG, label: 'Configurar Agentes', icon: Bot },
+            { id: Page.CRAWLER_CONFIG, label: 'Web Crawlers', icon: Globe },
+            { id: Page.LLM_JUDGE, label: 'LLM Judge (Supervisor)', icon: Gavel },
+          ]
+        }
       ]
     },
     {
@@ -51,6 +62,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
       items: [
         { id: Page.COST_CONTROL, label: 'Controle de custos', icon: CircleDollarSign },
         { id: Page.REPORTS, label: 'Relatórios & Auditoria', icon: FileText },
+        { id: Page.HISTORY, label: 'Histórico Conversas', icon: History },
+      ]
+    },
+    {
+      title: "Outros",
+      collapsible: true,
+      items: [
+        { id: Page.STRATEGY, label: 'Estratégia & Gaps', icon: Map },
+        { id: Page.BOT_FARM, label: 'Gestão de coleta', icon: ServerCog },
+        { id: Page.LIVE_INVESTIGATION, label: 'Investigações ao vivo', icon: Radio },
+        { id: Page.HUMAN_INTERVENTION, label: 'Monitoramento humano', icon: UserCog },
+        { id: Page.HUMAN_CHAT_CONSOLE, label: 'Console de Intervenção', icon: UserCog },
       ]
     }
   ];
@@ -71,33 +94,85 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto custom-scrollbar">
-        {navGroups.map((group, index) => (
-          <div key={index}>
-            <h3 className="px-4 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-              {group.title}
-            </h3>
-            <div className="space-y-1">
-              {group.items.map((item) => {
-                const isActive = activePage === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => onNavigate(item.id)}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                      isActive 
-                        ? "bg-brand/10 text-brand border border-brand/20 shadow-sm" 
-                        : "text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-transparent"
-                    )}
-                  >
-                    <item.icon className={cn("w-4 h-4", isActive ? "text-brand" : "text-slate-500")} />
-                    {item.label}
-                  </button>
-                );
-              })}
+        {navGroups.map((group, index) => {
+          // Logic for collapsible group (Outros)
+          const isCollapsible = group.collapsible;
+          const isOpen = isCollapsible ? isOthersOpen : true;
+
+          return (
+            <div key={index}>
+              {isCollapsible ? (
+                <button 
+                  onClick={() => setIsOthersOpen(!isOthersOpen)}
+                  className="w-full flex items-center justify-between px-4 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider hover:text-slate-300 transition-colors"
+                >
+                  {group.title}
+                  {isOthersOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                </button>
+              ) : (
+                <h3 className="px-4 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  {group.title}
+                </h3>
+              )}
+              
+              {isOpen && (
+                <div className="space-y-1 animate-in slide-in-from-top-2 duration-200">
+                  {group.items.map((item: any) => {
+                    // Render Subgroup
+                    if (item.isSubgroup) {
+                      return (
+                        <div key={item.title} className="mt-2 mb-2">
+                          <h4 className="px-4 mb-1 text-[10px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-2">
+                             <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
+                             {item.title}
+                          </h4>
+                          <div className="space-y-1 border-l border-slate-800 ml-6 pl-2">
+                            {item.items.map((subItem: any) => {
+                               const isActive = activePage === subItem.id;
+                               return (
+                                <button
+                                  key={subItem.id}
+                                  onClick={() => onNavigate(subItem.id)}
+                                  className={cn(
+                                    "w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200",
+                                    isActive 
+                                      ? "text-brand bg-brand/5" 
+                                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                                  )}
+                                >
+                                  <subItem.icon className={cn("w-3.5 h-3.5", isActive ? "text-brand" : "text-slate-500")} />
+                                  {subItem.label}
+                                </button>
+                               );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // Render Normal Item
+                    const isActive = activePage === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => onNavigate(item.id)}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                          isActive 
+                            ? "bg-brand/10 text-brand border border-brand/20 shadow-sm" 
+                            : "text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-transparent"
+                        )}
+                      >
+                        <item.icon className={cn("w-4 h-4", isActive ? "text-brand" : "text-slate-500")} />
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </nav>
 
       {/* User Profile & Access Control Simulator */}

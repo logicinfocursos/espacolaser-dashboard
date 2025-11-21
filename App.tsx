@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Overview from './pages/Overview';
@@ -9,6 +10,7 @@ import LiveChat from './pages/LiveChat';
 import Reports from './pages/Reports';
 import AISettings from './pages/AISettings';
 import AgentConfig from './pages/AgentConfig';
+import CrawlerConfig from './pages/CrawlerConfig';
 import CostControl from './pages/CostControl';
 import LLMJudge from './pages/LLMJudge';
 import HumanIntervention from './pages/HumanIntervention';
@@ -21,7 +23,8 @@ import ConversationHistory from './pages/ConversationHistory';
 import CompetitiveData from './pages/CompetitiveData';
 import GlobalChat from './components/GlobalChat';
 import HumanChatConsole from './pages/HumanChatConsole';
-import LiveConversations from './pages/LiveConversations'; 
+import LiveConversations from './pages/LiveConversations';
+import PromptTemplates from './pages/PromptTemplates';
 import { Page } from './types';
 
 const App: React.FC = () => {
@@ -49,6 +52,8 @@ const App: React.FC = () => {
         return <AISettings />;
       case Page.AGENT_CONFIG:
         return <AgentConfig />;
+      case Page.CRAWLER_CONFIG:
+        return <CrawlerConfig />;
       case Page.COST_CONTROL:
         return <CostControl />;
       case Page.LLM_JUDGE:
@@ -67,6 +72,8 @@ const App: React.FC = () => {
         return <SimManagement />;
       case Page.MESSAGE_TEMPLATES:
         return <MessageTemplates />;
+      case Page.PROMPTS:
+        return <PromptTemplates />;
       case Page.HISTORY:
         return <ConversationHistory />;
       default:

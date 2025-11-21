@@ -264,10 +264,11 @@ export enum Page {
   BOT_FARM = 'bot_farm',
   PRICING = 'pricing',
   LIVE_INVESTIGATION = 'live_investigation',
-  LIVE_CONVERSATIONS = 'live_conversations', // New Page
+  LIVE_CONVERSATIONS = 'live_conversations', 
   REPORTS = 'reports',
   AI_SETTINGS = 'ai_settings',
   AGENT_CONFIG = 'agent_config',
+  CRAWLER_CONFIG = 'crawler_config',
   COST_CONTROL = 'cost_control',
   LLM_JUDGE = 'llm_judge',
   HUMAN_INTERVENTION = 'human_intervention',
@@ -276,6 +277,7 @@ export enum Page {
   JOB_MONITORING = 'job_monitoring',
   SIM_MANAGEMENT = 'sim_management',
   MESSAGE_TEMPLATES = 'message_templates',
+  PROMPTS = 'prompts', // New Page
   HISTORY = 'history',
   COMPETITIVE_DATA = 'competitive_data',
   HUMAN_CHAT_CONSOLE = 'human_chat_console'
