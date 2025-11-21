@@ -20,6 +20,8 @@ import MessageTemplates from './pages/MessageTemplates';
 import ConversationHistory from './pages/ConversationHistory';
 import CompetitiveData from './pages/CompetitiveData';
 import GlobalChat from './components/GlobalChat';
+import HumanChatConsole from './pages/HumanChatConsole';
+import LiveConversations from './pages/LiveConversations'; 
 import { Page } from './types';
 
 const App: React.FC = () => {
@@ -39,6 +41,8 @@ const App: React.FC = () => {
         return <Strategy />;
       case Page.LIVE_INVESTIGATION:
         return <LiveChat />;
+      case Page.LIVE_CONVERSATIONS:
+        return <LiveConversations />;
       case Page.REPORTS:
         return <Reports />;
       case Page.AI_SETTINGS:
@@ -51,6 +55,8 @@ const App: React.FC = () => {
         return <LLMJudge />;
       case Page.HUMAN_INTERVENTION:
         return <HumanIntervention />;
+      case Page.HUMAN_CHAT_CONSOLE:
+        return <HumanChatConsole />;
       case Page.PROSPECTS:
         return <Prospects />;
       case Page.PROSPECTION_JOBS:

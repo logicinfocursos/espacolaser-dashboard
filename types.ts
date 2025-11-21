@@ -264,6 +264,7 @@ export enum Page {
   BOT_FARM = 'bot_farm',
   PRICING = 'pricing',
   LIVE_INVESTIGATION = 'live_investigation',
+  LIVE_CONVERSATIONS = 'live_conversations', // New Page
   REPORTS = 'reports',
   AI_SETTINGS = 'ai_settings',
   AGENT_CONFIG = 'agent_config',
@@ -276,5 +277,6 @@ export enum Page {
   SIM_MANAGEMENT = 'sim_management',
   MESSAGE_TEMPLATES = 'message_templates',
   HISTORY = 'history',
-  COMPETITIVE_DATA = 'competitive_data'
+  COMPETITIVE_DATA = 'competitive_data',
+  HUMAN_CHAT_CONSOLE = 'human_chat_console'
 }
