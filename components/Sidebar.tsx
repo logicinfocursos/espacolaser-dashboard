@@ -1,7 +1,8 @@
 import React from 'react';
-import { LayoutDashboard, Tag, Radio, Map, ServerCog } from 'lucide-react';
+import { LayoutDashboard, Tag, Radio, Map, ServerCog, FileText, LogOut, Settings, CircleDollarSign, Gavel, UserCog, UserPlus, Briefcase, Activity, Smartphone, Copy, History, Database, Bot } from 'lucide-react';
 import { Page } from '../types';
 import { cn } from './ui';
+import { CURRENT_USER } from '../constants';
 
 interface SidebarProps {
   activePage: Page;
@@ -13,8 +14,21 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
     { id: Page.OVERVIEW, label: 'Visão Geral', icon: LayoutDashboard },
     { id: Page.STRATEGY, label: 'Estratégia & Gaps', icon: Map },
     { id: Page.PRICING, label: 'Intel. de Preços', icon: Tag },
-    { id: Page.BOT_FARM, label: 'Gestão de Bots/SIM', icon: ServerCog },
+    { id: Page.COMPETITIVE_DATA, label: 'Dados Competitivos', icon: Database },
+    { id: Page.BOT_FARM, label: 'Gestão de Coleta', icon: ServerCog },
+    { id: Page.SIM_MANAGEMENT, label: 'Gestão de SIMs', icon: Smartphone },
+    { id: Page.PROSPECTION_JOBS, label: 'Gestão de Jobs', icon: Briefcase },
+    { id: Page.JOB_MONITORING, label: 'Monitoramento', icon: Activity },
+    { id: Page.HISTORY, label: 'Histórico Conversas', icon: History },
+    { id: Page.PROSPECTS, label: 'Gestão de Prospects', icon: UserPlus },
+    { id: Page.MESSAGE_TEMPLATES, label: 'Templates Mensagem', icon: Copy },
     { id: Page.LIVE_INVESTIGATION, label: 'Investigações ao Vivo', icon: Radio },
+    { id: Page.AGENT_CONFIG, label: 'Parametrizar Agentes', icon: Bot },
+    { id: Page.LLM_JUDGE, label: 'LLM Judge (Supervisor)', icon: Gavel },
+    { id: Page.HUMAN_INTERVENTION, label: 'Monitoramento Humano', icon: UserCog },
+    { id: Page.COST_CONTROL, label: 'Controle de Custos', icon: CircleDollarSign },
+    { id: Page.REPORTS, label: 'Relatórios & Auditoria', icon: FileText },
+    { id: Page.AI_SETTINGS, label: 'Configurações de IA', icon: Settings },
   ];
 
   return (
@@ -30,7 +44,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
         </div>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
         {navItems.map((item) => {
           const isActive = activePage === item.id;
           return (
@@ -51,7 +65,17 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
         })}
       </nav>
 
+      {/* User Profile & Access Control Simulator */}
       <div className="p-4 border-t border-dark-border/50">
+        <div className="bg-slate-900/50 p-3 rounded-lg border border-dark-border flex items-center gap-3 mb-3">
+            <img src={CURRENT_USER.avatar} alt="User" className="w-8 h-8 rounded-full border border-slate-600" />
+            <div className="flex-1 overflow-hidden">
+                <div className="text-xs font-bold text-slate-200 truncate">{CURRENT_USER.name}</div>
+                <div className="text-[10px] text-brand uppercase tracking-wide">{CURRENT_USER.role}</div>
+            </div>
+            <LogOut className="w-4 h-4 text-slate-500 hover:text-red-400 cursor-pointer" />
+        </div>
+
         <div className="bg-slate-900/50 p-3 rounded-lg border border-dark-border">
           <div className="flex justify-between items-center mb-2">
             <p className="text-xs text-slate-500">Investigações Hoje</p>

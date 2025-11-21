@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, TrendingUp, AlertCircle, Zap } from 'lucide-react';
+import { MapPin, TrendingUp, AlertCircle, Zap, Target, PieChart, Globe } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, Button, Badge } from '../components/ui';
 import { MOCK_STRATEGIC_GAPS } from '../constants';
 
@@ -9,6 +9,69 @@ const Strategy: React.FC = () => {
       <div>
         <h2 className="text-2xl font-bold text-slate-100">Estratégia & Gaps de Mercado</h2>
         <p className="text-slate-400">Onde não somos líderes e o que fazer para mudar.</p>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-l-4 border-l-red-500 bg-dark-surface border-dark-border">
+            <CardContent className="pt-6">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <div className="text-sm text-slate-400">Gaps Identificados</div>
+                        <div className="text-2xl font-bold text-white">{MOCK_STRATEGIC_GAPS.length}</div>
+                    </div>
+                    <div className="p-2 bg-slate-800 rounded-lg text-red-400">
+                        <Target className="w-5 h-5" />
+                    </div>
+                </div>
+                <div className="text-xs text-red-500 mt-1">Oportunidades críticas</div>
+            </CardContent>
+        </Card>
+
+        <Card className="border-l-4 border-l-brand bg-dark-surface border-dark-border">
+            <CardContent className="pt-6">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <div className="text-sm text-slate-400">Potencial Receita</div>
+                        <div className="text-2xl font-bold text-white">R$ 2.4M</div>
+                    </div>
+                    <div className="p-2 bg-slate-800 rounded-lg text-brand">
+                        <TrendingUp className="w-5 h-5" />
+                    </div>
+                </div>
+                <div className="text-xs text-green-500 mt-1">+12% vs Mês Anterior</div>
+            </CardContent>
+        </Card>
+
+        <Card className="border-l-4 border-l-yellow-500 bg-dark-surface border-dark-border">
+            <CardContent className="pt-6">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <div className="text-sm text-slate-400">Share Médio (Gaps)</div>
+                        <div className="text-2xl font-bold text-white">33%</div>
+                    </div>
+                    <div className="p-2 bg-slate-800 rounded-lg text-yellow-400">
+                        <PieChart className="w-5 h-5" />
+                    </div>
+                </div>
+                <div className="text-xs text-slate-500 mt-1">Meta: Atingir 50%</div>
+            </CardContent>
+        </Card>
+
+        <Card className="border-l-4 border-l-blue-500 bg-dark-surface border-dark-border">
+            <CardContent className="pt-6">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <div className="text-sm text-slate-400">Regiões Alvo</div>
+                        <div className="text-2xl font-bold text-white">3</div>
+                    </div>
+                    <div className="p-2 bg-slate-800 rounded-lg text-blue-400">
+                        <Globe className="w-5 h-5" />
+                    </div>
+                </div>
+                <div className="text-xs text-slate-500 mt-1">Sul, Nordeste, Sudeste</div>
+            </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
