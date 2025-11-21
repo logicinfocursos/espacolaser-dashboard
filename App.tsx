@@ -1,5 +1,4 @@
 
-
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Overview from './pages/Overview';
@@ -29,6 +28,7 @@ import { Page } from './types';
 
 const App: React.FC = () => {
   const [activePage, setActivePage] = useState<Page>(Page.OVERVIEW);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const renderPage = () => {
     switch (activePage) {
@@ -83,8 +83,17 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-dark-bg text-slate-100 font-sans flex">
-      <Sidebar activePage={activePage} onNavigate={setActivePage} />
-      <main className="flex-1 ml-64 p-8 h-screen overflow-y-auto custom-scrollbar">
+      <Sidebar 
+        activePage={activePage} 
+        onNavigate={setActivePage} 
+        isCollapsed={isSidebarCollapsed}
+        toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
+      <main 
+        className={`flex-1 p-8 h-screen overflow-y-auto custom-scrollbar transition-all duration-300 ease-in-out ${
+          isSidebarCollapsed ? 'ml-20' : 'ml-64'
+        }`}
+      >
         <div className="max-w-7xl mx-auto pb-10">
           {renderPage()}
         </div>
