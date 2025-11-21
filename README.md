@@ -1,8 +1,9 @@
 # Projeto Olho Vivo
 (github)[https://github.com/logicinfocursos/espacolaser-dashboard.git]
+(vercel em execução)[https://espacolaser-dashboard.vercel.app/]
 (projeto no google ai studio)[https://aistudio.google.com/apps/drive/1s69XJnCSE9PhX-GH0FClSUHnraLaYL9X?showPreview=true&showAssistant=true]
 ## Descrição do Projeto
-
+**essa é a versão do google ai studio**
 **Olho Vivo** é uma plataforma avançada de inteligência competitiva e automação de vendas voltada para o setor de estética e laser. O sistema integra bots investigativos, análise de preços da concorrência, gestão de prospecção automatizada e monitoramento em tempo real de operações comerciais.
 
 A plataforma utiliza tecnologias de IA (LLMs como Gemini, OpenAI) para conduzir conversas autônomas, coletar dados de mercado através de web crawlers e agentes em WhatsApp, e fornecer insights estratégicos para tomada de decisão.
